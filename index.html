@@ -6,17 +6,15 @@
 
 <title>Mnemonic Solidifier</title>
 
-    <!-- Phone / app icon -->
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="icon" type="image/png" href="icon.png">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
 
-<!-- Makes it feel more like an app when added to home screen -->
+<meta name="theme-color" content="#101114">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mnemonic">
-
-<!-- Browser / phone theme colour -->
-<meta name="theme-color" content="#101114">
 
 <style>
     :root {
@@ -29,9 +27,7 @@
         --success: #83d6a5;
     }
 
-    * {
-        box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
         margin: 0;
@@ -45,9 +41,7 @@
         padding: 20px;
     }
 
-    .app {
-        width: min(520px, 100%);
-    }
+    .app { width: min(520px, 100%); }
 
     h1 {
         margin: 0;
@@ -84,9 +78,7 @@
         transition: transform .08s ease, opacity .15s ease;
     }
 
-    button:active {
-        transform: scale(.98);
-    }
+    button:active { transform: scale(.98); }
 
     .mode {
         background: var(--card2);
@@ -143,6 +135,26 @@
         color: var(--text);
     }
 
+    .install {
+        width: 100%;
+        margin-top: 16px;
+        background: var(--success);
+        color: #111;
+        font-weight: 750;
+    }
+
+    .ios-hint {
+        display: none;
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 12px;
+        background: var(--card2);
+        color: var(--muted);
+        text-align: center;
+        font-size: .88rem;
+        line-height: 1.4;
+    }
+
     .stats {
         display: flex;
         justify-content: space-between;
@@ -167,9 +179,7 @@
         font-size: .85rem;
     }
 
-    .pitch.used {
-        color: var(--success);
-    }
+    .pitch.used { color: var(--success); }
 
     .tiny {
         text-align: center;
@@ -179,9 +189,7 @@
     }
 
     @media(max-width: 420px) {
-        #note {
-            font-size: 5rem;
-        }
+        #note { font-size: 5rem; }
     }
 </style>
 </head>
@@ -196,36 +204,18 @@
     <div class="card">
 
         <div class="mode-buttons">
-            <button class="mode active" id="hearMode">
-                Hear → Name
-            </button>
-
-            <button class="mode" id="recallMode">
-                Note → Recall
-            </button>
+            <button class="mode active" id="hearMode">Hear → Name</button>
+            <button class="mode" id="recallMode">Note → Recall</button>
         </div>
 
         <div class="display">
-
-            <div id="instruction">
-                Hear the mnemonic and identify its note.
-            </div>
-
+            <div id="instruction">Hear the mnemonic and identify its note.</div>
             <div id="note">?</div>
-
-            <div id="status">
-                Ready.
-            </div>
-
+            <div id="status">Ready.</div>
         </div>
 
-        <button class="primary" id="mainButton">
-            Play Random Mnemonic
-        </button>
-
-        <button class="secondary" id="secondaryButton" style="display:none;">
-            Reveal Note
-        </button>
+        <button class="primary" id="mainButton">Play Random Mnemonic</button>
+        <button class="secondary" id="secondaryButton" style="display:none;">Reveal Note</button>
 
         <div class="stats">
             <span id="progress">0 / 12 this round</span>
@@ -233,6 +223,12 @@
         </div>
 
         <div class="pitch-grid" id="pitchGrid"></div>
+
+        <button class="install" id="installButton" style="display:none;">Install App</button>
+
+        <div class="ios-hint" id="iosHint">
+            On iPhone/iPad: tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.
+        </div>
 
     </div>
 
@@ -243,103 +239,67 @@
 </div>
 
 <script>
-
-//
-// MNEMONIC CONFIGURATION
-//
-// Change the filenames here if your recordings use different names
-// or file types (.m4a, .wav etc.)
-//
-
 const NOTES = [
-    { note: "A",  file: "A.wav"  },
-    { note: "B",  file: "B.wav"  },
-    { note: "Bb", file: "Bb.wav" },
-    { note: "C",  file: "C.wav"  },
-    { note: "D",  file: "D.wav"  },
-    { note: "Db", file: "Db.wav" },
-    { note: "E",  file: "E.wav"  },
-    { note: "Eb", file: "Eb.wav" },
-    { note: "F",  file: "F.wav"  },
-    { note: "F#", file: "Fs.wav" },
-    { note: "G",  file: "G.wav"  },
-    { note: "G#", file: "Gs.wav" }
+    { note: "A",  file: "./A.wav"  },
+    { note: "B",  file: "./B.wav"  },
+    { note: "Bb", file: "./Bb.wav" },
+    { note: "C",  file: "./C.wav"  },
+    { note: "D",  file: "./D.wav"  },
+    { note: "Db", file: "./Db.wav" },
+    { note: "E",  file: "./E.wav"  },
+    { note: "Eb", file: "./Eb.wav" },
+    { note: "F",  file: "./F.wav"  },
+    { note: "F#", file: "./Fs.wav" },
+    { note: "G",  file: "./G.wav"  },
+    { note: "G#", file: "./Gs.wav" }
 ];
 
 let mode = "hear";
 let bag = [];
 let current = null;
 let audio = null;
-
 let completed = [];
 let roundNumber = 1;
 
 const noteDisplay = document.getElementById("note");
 const statusDisplay = document.getElementById("status");
 const instruction = document.getElementById("instruction");
-
 const mainButton = document.getElementById("mainButton");
 const secondaryButton = document.getElementById("secondaryButton");
-
 const hearModeButton = document.getElementById("hearMode");
 const recallModeButton = document.getElementById("recallMode");
-
 const progressDisplay = document.getElementById("progress");
 const roundDisplay = document.getElementById("round");
-
 const pitchGrid = document.getElementById("pitchGrid");
-
-
-//
-// SHUFFLE
-//
+const installButton = document.getElementById("installButton");
+const iosHint = document.getElementById("iosHint");
 
 function shuffle(array) {
-
     const a = [...array];
-
     for (let i = a.length - 1; i > 0; i--) {
-
         const j = Math.floor(Math.random() * (i + 1));
-
         [a[i], a[j]] = [a[j], a[i]];
     }
-
     return a;
 }
 
-
 function refillBag() {
-
     bag = shuffle(NOTES);
-
     completed = [];
-
     updateGrid();
     updateStats();
 }
 
-
 function nextMnemonic() {
-
     if (bag.length === 0) {
-
         roundNumber++;
         refillBag();
     }
-
     current = bag.pop();
-
     return current;
 }
 
-
-//
-// AUDIO
-//
-
 function playCurrent() {
-
     if (!current) return;
 
     if (audio) {
@@ -348,7 +308,6 @@ function playCurrent() {
     }
 
     audio = new Audio(current.file);
-
     statusDisplay.textContent = "Playing…";
 
     audio.play()
@@ -357,114 +316,69 @@ function playCurrent() {
         })
         .catch(() => {
             statusDisplay.textContent =
-                "Couldn't play " + current.file +
-                " — check the filename.";
+                "Couldn't play " + current.file + " — check the filename.";
         });
 
     audio.onended = () => {
-        statusDisplay.textContent = "Recall the note before revealing it.";
+        if (mode === "hear") {
+            statusDisplay.textContent = "Recall the note before revealing it.";
+        } else {
+            statusDisplay.textContent = "Compare that with what you heard internally.";
+        }
     };
 }
 
-
-//
-// MODE 1:
-// HEAR MNEMONIC → NAME NOTE
-//
-
 function startHearTrial() {
-
     nextMnemonic();
-
     noteDisplay.textContent = "?";
-
-    instruction.textContent =
-        "Hear the mnemonic. What note does it belong to?";
-
+    instruction.textContent = "Hear the mnemonic. What note does it belong to?";
+    statusDisplay.textContent = "Listen carefully.";
     mainButton.textContent = "Play Again";
-
+    mainButton.onclick = playCurrent;
     secondaryButton.textContent = "Reveal Note";
     secondaryButton.style.display = "block";
-
+    secondaryButton.onclick = revealHearAnswer;
     playCurrent();
 }
 
-
 function revealHearAnswer() {
-
     if (!current) return;
 
     noteDisplay.textContent = current.note;
-
     statusDisplay.textContent =
         "Connect the mnemonic firmly with " + current.note + ".";
-
     completeCurrent();
 
     secondaryButton.textContent = "Next Mnemonic";
-
-    secondaryButton.onclick = () => {
-        startHearTrial();
-        secondaryButton.onclick = revealHearAnswer;
-    };
+    secondaryButton.onclick = startHearTrial;
 }
 
-
-//
-// MODE 2:
-// SEE NOTE → INTERNALLY RECALL MNEMONIC
-//
-
 function startRecallTrial() {
-
     nextMnemonic();
-
     noteDisplay.textContent = current.note;
-
-    instruction.textContent =
-        "Hear the mnemonic internally before checking.";
-
+    instruction.textContent = "Hear the mnemonic internally before checking.";
     statusDisplay.textContent =
         "Can you hear your " + current.note + " mnemonic in your head?";
-
     mainButton.textContent = "Play Mnemonic";
-
+    mainButton.onclick = checkRecall;
     secondaryButton.style.display = "none";
 }
 
-
 function checkRecall() {
-
-    if (!current) {
-        startRecallTrial();
-        return;
-    }
+    if (!current) return;
 
     playCurrent();
-
     completeCurrent();
+
+    mainButton.textContent = "Play Again";
+    mainButton.onclick = playCurrent;
 
     secondaryButton.textContent = "Next Note";
     secondaryButton.style.display = "block";
-
-    secondaryButton.onclick = () => {
-        startRecallTrial();
-        secondaryButton.onclick = nextRecall;
-    };
+    secondaryButton.onclick = startRecallTrial;
 }
-
-
-function nextRecall() {
-    startRecallTrial();
-}
-
-
-//
-// PROGRESS
-//
 
 function completeCurrent() {
-
     if (!current) return;
 
     if (!completed.includes(current.note)) {
@@ -475,146 +389,116 @@ function completeCurrent() {
     updateStats();
 }
 
-
 function updateStats() {
-
-    progressDisplay.textContent =
-        completed.length + " / 12 this round";
-
-    roundDisplay.textContent =
-        "Round " + roundNumber;
+    progressDisplay.textContent = completed.length + " / 12 this round";
+    roundDisplay.textContent = "Round " + roundNumber;
 }
 
-
 function buildGrid() {
-
     pitchGrid.innerHTML = "";
 
     NOTES.forEach(item => {
-
         const div = document.createElement("div");
-
         div.className = "pitch";
         div.dataset.note = item.note;
         div.textContent = item.note;
-
         pitchGrid.appendChild(div);
     });
 }
 
-
 function updateGrid() {
-
     document.querySelectorAll(".pitch").forEach(el => {
-
-        if (completed.includes(el.dataset.note)) {
-            el.classList.add("used");
-        } else {
-            el.classList.remove("used");
-        }
+        el.classList.toggle("used", completed.includes(el.dataset.note));
     });
 }
 
-
-//
-// MODE SWITCHING
-//
-
 function setHearMode() {
-
     mode = "hear";
 
     hearModeButton.classList.add("active");
     recallModeButton.classList.remove("active");
 
     current = null;
-
     noteDisplay.textContent = "?";
-
-    instruction.textContent =
-        "Hear the mnemonic and identify its note.";
-
+    instruction.textContent = "Hear the mnemonic and identify its note.";
     statusDisplay.textContent = "Ready.";
-
-    mainButton.textContent =
-        "Play Random Mnemonic";
-
-    secondaryButton.style.display = "none";
-
+    mainButton.textContent = "Play Random Mnemonic";
     mainButton.onclick = startHearTrial;
-    secondaryButton.onclick = revealHearAnswer;
+    secondaryButton.style.display = "none";
 }
 
-
 function setRecallMode() {
-
     mode = "recall";
 
     recallModeButton.classList.add("active");
     hearModeButton.classList.remove("active");
 
     current = null;
-
     noteDisplay.textContent = "—";
-
-    instruction.textContent =
-        "See a note and recall its mnemonic internally.";
-
+    instruction.textContent = "See a note and recall its mnemonic internally.";
     statusDisplay.textContent = "Ready.";
-
-    mainButton.textContent =
-        "Give Me a Note";
-
+    mainButton.textContent = "Give Me a Note";
+    mainButton.onclick = startRecallTrial;
     secondaryButton.style.display = "none";
-
-    mainButton.onclick = () => {
-
-        if (!current) {
-            startRecallTrial();
-        } else {
-            checkRecall();
-        }
-    };
 }
-
-
-//
-// BUTTONS
-//
 
 hearModeButton.onclick = setHearMode;
 recallModeButton.onclick = setRecallMode;
 
-mainButton.onclick = startHearTrial;
-secondaryButton.onclick = revealHearAnswer;
-
-
-// Keyboard shortcuts
 document.addEventListener("keydown", event => {
-
     if (event.code === "Space") {
-
         event.preventDefault();
-
         mainButton.click();
     }
-
     if (event.key.toLowerCase() === "r" &&
         secondaryButton.style.display !== "none") {
-
         secondaryButton.click();
     }
 });
 
+// Register the service worker for offline use.
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js")
+            .catch(err => console.error("Service worker registration failed:", err));
+    });
+}
 
-//
-// START
-//
+// Android / Chromium install prompt.
+let deferredPrompt = null;
+
+window.addEventListener("beforeinstallprompt", event => {
+    event.preventDefault();
+    deferredPrompt = event;
+    installButton.style.display = "block";
+});
+
+installButton.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installButton.style.display = "none";
+});
+
+window.addEventListener("appinstalled", () => {
+    installButton.style.display = "none";
+});
+
+// iPhone/iPad installation hint.
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+
+if (isIOS && !isStandalone) {
+    iosHint.style.display = "block";
+}
 
 buildGrid();
 refillBag();
 setHearMode();
-
 </script>
 
 </body>
