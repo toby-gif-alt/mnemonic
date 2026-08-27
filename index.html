@@ -17,185 +17,196 @@
 <meta name="apple-mobile-web-app-title" content="Mnemonic">
 
 <style>
-    :root {
-        --bg: #101114;
-        --card: #191b20;
-        --card2: #23262d;
-        --text: #f5f5f5;
-        --muted: #a6abb5;
-        --accent: #8ea8ff;
-        --success: #83d6a5;
-    }
+:root {
+    --bg: #101114;
+    --card: #191b20;
+    --card2: #23262d;
+    --text: #f5f5f5;
+    --muted: #a6abb5;
+    --accent: #8ea8ff;
+    --success: #83d6a5;
+}
 
-    * { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
-    body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
 
-    .app { width: min(520px, 100%); }
+.app { width: min(520px, 100%); }
 
-    h1 {
-        margin: 0;
-        font-size: 2rem;
-        text-align: center;
-    }
+h1 {
+    margin: 0;
+    font-size: 2rem;
+    text-align: center;
+}
 
-    .subtitle {
-        text-align: center;
-        color: var(--muted);
-        margin: 6px 0 24px;
-    }
+.subtitle {
+    text-align: center;
+    color: var(--muted);
+    margin: 6px 0 24px;
+}
 
-    .card {
-        background: var(--card);
-        border-radius: 22px;
-        padding: 24px;
-        box-shadow: 0 12px 35px rgba(0,0,0,.25);
-    }
+.card {
+    background: var(--card);
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.25);
+}
 
-    .mode-buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 24px;
-    }
+.mode-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 24px;
+}
 
-    button {
-        font: inherit;
-        border: 0;
-        cursor: pointer;
-        border-radius: 14px;
-        padding: 14px 16px;
-        transition: transform .08s ease, opacity .15s ease;
-    }
+button {
+    font: inherit;
+    border: 0;
+    cursor: pointer;
+    border-radius: 14px;
+    padding: 14px 12px;
+    transition: transform .08s ease;
+}
 
-    button:active { transform: scale(.98); }
+button:active { transform: scale(.97); }
 
-    .mode {
-        background: var(--card2);
-        color: var(--muted);
-    }
+.mode {
+    background: var(--card2);
+    color: var(--muted);
+    font-size: .92rem;
+}
 
-    .mode.active {
-        background: var(--accent);
-        color: #111;
-        font-weight: 700;
-    }
+.mode.active {
+    background: var(--accent);
+    color: #111;
+    font-weight: 700;
+}
 
-    .display {
-        min-height: 210px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-    }
+.display {
+    min-height: 195px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
 
-    #instruction {
-        color: var(--muted);
-        font-size: .95rem;
-        min-height: 24px;
-    }
+#instruction {
+    color: var(--muted);
+    font-size: .95rem;
+    min-height: 24px;
+}
 
-    #note {
-        font-size: 6rem;
-        line-height: 1;
-        font-weight: 800;
-        margin: 14px 0;
-        min-height: 96px;
-    }
+#note {
+    font-size: 6rem;
+    line-height: 1;
+    font-weight: 800;
+    margin: 14px 0;
+    min-height: 96px;
+}
 
-    #status {
-        color: var(--muted);
-        min-height: 24px;
-    }
+#status {
+    color: var(--muted);
+    min-height: 24px;
+}
 
-    .primary {
-        width: 100%;
-        margin-top: 8px;
-        background: var(--accent);
-        color: #111;
-        font-weight: 750;
-        font-size: 1.1rem;
-    }
+.primary {
+    width: 100%;
+    margin-top: 8px;
+    background: var(--accent);
+    color: #111;
+    font-weight: 750;
+    font-size: 1.05rem;
+}
 
-    .secondary {
-        width: 100%;
-        margin-top: 10px;
-        background: var(--card2);
-        color: var(--text);
-    }
+.secondary {
+    width: 100%;
+    margin-top: 10px;
+    background: var(--card2);
+    color: var(--text);
+}
 
-    .install {
-        width: 100%;
-        margin-top: 16px;
-        background: var(--success);
-        color: #111;
-        font-weight: 750;
-    }
+.stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+    font-size: .88rem;
+    color: var(--muted);
+}
 
-    .ios-hint {
-        display: none;
-        margin-top: 16px;
-        padding: 12px;
-        border-radius: 12px;
-        background: var(--card2);
-        color: var(--muted);
-        text-align: center;
-        font-size: .88rem;
-        line-height: 1.4;
-    }
+.listen-panel {
+    display: none;
+}
 
-    .stats {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 18px;
-        font-size: .88rem;
-        color: var(--muted);
-    }
+.listen-title {
+    text-align: center;
+    color: var(--muted);
+    margin: 4px 0 16px;
+}
 
-    .pitch-grid {
-        margin-top: 20px;
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 7px;
-    }
+.pitch-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 9px;
+}
 
-    .pitch {
-        background: var(--card2);
-        color: var(--muted);
-        padding: 9px 4px;
-        text-align: center;
-        border-radius: 9px;
-        font-size: .85rem;
-    }
+.pitch {
+    background: var(--card2);
+    color: var(--text);
+    padding: 16px 6px;
+    font-weight: 750;
+    border-radius: 12px;
+}
 
-    .pitch.used { color: var(--success); }
+.pitch.playing {
+    background: var(--accent);
+    color: #111;
+}
 
-    .tiny {
-        text-align: center;
-        color: var(--muted);
-        font-size: .8rem;
-        margin-top: 18px;
-    }
+.install {
+    width: 100%;
+    margin-top: 16px;
+    background: var(--success);
+    color: #111;
+    font-weight: 750;
+}
 
-    @media(max-width: 420px) {
-        #note { font-size: 5rem; }
-    }
+.ios-hint {
+    display: none;
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--card2);
+    color: var(--muted);
+    text-align: center;
+    font-size: .88rem;
+}
+
+.tiny {
+    text-align: center;
+    color: var(--muted);
+    font-size: .8rem;
+    margin-top: 18px;
+}
+
+@media(max-width: 420px) {
+    #note { font-size: 5rem; }
+    .mode { font-size: .82rem; padding: 13px 7px; }
+}
 </style>
 </head>
 
 <body>
-
 <div class="app">
 
     <h1>Mnemonic Solidifier</h1>
@@ -206,23 +217,30 @@
         <div class="mode-buttons">
             <button class="mode active" id="hearMode">Hear → Name</button>
             <button class="mode" id="recallMode">Note → Recall</button>
+            <button class="mode" id="listenMode">Listen</button>
         </div>
 
-        <div class="display">
-            <div id="instruction">Hear the mnemonic and identify its note.</div>
-            <div id="note">?</div>
-            <div id="status">Ready.</div>
+        <div id="practicePanel">
+            <div class="display">
+                <div id="instruction">Hear the mnemonic and identify its note.</div>
+                <div id="note">?</div>
+                <div id="status">Ready.</div>
+            </div>
+
+            <button class="primary" id="mainButton">Play Random Mnemonic</button>
+            <button class="secondary" id="secondaryButton" style="display:none;">Reveal Note</button>
+
+            <div class="stats">
+                <span id="progress">0 / 12 this round</span>
+                <span id="round">Round 1</span>
+            </div>
         </div>
 
-        <button class="primary" id="mainButton">Play Random Mnemonic</button>
-        <button class="secondary" id="secondaryButton" style="display:none;">Reveal Note</button>
-
-        <div class="stats">
-            <span id="progress">0 / 12 this round</span>
-            <span id="round">Round 1</span>
+        <div class="listen-panel" id="listenPanel">
+            <div class="listen-title">Tap any note to hear its mnemonic</div>
+            <div class="pitch-grid" id="pitchGrid"></div>
+            <div id="listenStatus" class="listen-title" style="margin-top:16px;">Choose a note.</div>
         </div>
-
-        <div class="pitch-grid" id="pitchGrid"></div>
 
         <button class="install" id="installButton" style="display:none;">Install App</button>
 
@@ -232,9 +250,7 @@
 
     </div>
 
-    <div class="tiny">
-        All 12 notes are presented once in a random order before reshuffling.
-    </div>
+    <div class="tiny">All 12 notes are used once in random practice before reshuffling.</div>
 
 </div>
 
@@ -261,6 +277,8 @@ let audio = null;
 let completed = [];
 let roundNumber = 1;
 
+const practicePanel = document.getElementById("practicePanel");
+const listenPanel = document.getElementById("listenPanel");
 const noteDisplay = document.getElementById("note");
 const statusDisplay = document.getElementById("status");
 const instruction = document.getElementById("instruction");
@@ -268,9 +286,11 @@ const mainButton = document.getElementById("mainButton");
 const secondaryButton = document.getElementById("secondaryButton");
 const hearModeButton = document.getElementById("hearMode");
 const recallModeButton = document.getElementById("recallMode");
+const listenModeButton = document.getElementById("listenMode");
 const progressDisplay = document.getElementById("progress");
 const roundDisplay = document.getElementById("round");
 const pitchGrid = document.getElementById("pitchGrid");
+const listenStatus = document.getElementById("listenStatus");
 const installButton = document.getElementById("installButton");
 const iosHint = document.getElementById("iosHint");
 
@@ -286,7 +306,6 @@ function shuffle(array) {
 function refillBag() {
     bag = shuffle(NOTES);
     completed = [];
-    updateGrid();
     updateStats();
 }
 
@@ -299,66 +318,76 @@ function nextMnemonic() {
     return current;
 }
 
-function playCurrent() {
-    if (!current) return;
+function updateStats() {
+    progressDisplay.textContent = completed.length + " / 12 this round";
+    roundDisplay.textContent = "Round " + roundNumber;
+}
 
+function completeCurrent() {
+    if (current && !completed.includes(current.note)) {
+        completed.push(current.note);
+        updateStats();
+    }
+}
+
+function stopAudio() {
     if (audio) {
         audio.pause();
         audio.currentTime = 0;
     }
+    document.querySelectorAll(".pitch").forEach(el => el.classList.remove("playing"));
+}
 
-    audio = new Audio(current.file);
-    statusDisplay.textContent = "Playing…";
+function playFile(item, onEnd) {
+    stopAudio();
+    audio = new Audio(item.file);
 
-    audio.play()
-        .then(() => {
-            statusDisplay.textContent = "Listen carefully.";
-        })
-        .catch(() => {
-            statusDisplay.textContent =
-                "Couldn't play " + current.file + " — check the filename.";
-        });
+    audio.play().catch(() => {
+        statusDisplay.textContent = "Couldn't play " + item.file;
+        listenStatus.textContent = "Couldn't play " + item.file;
+    });
 
     audio.onended = () => {
-        if (mode === "hear") {
-            statusDisplay.textContent = "Recall the note before revealing it.";
-        } else {
-            statusDisplay.textContent = "Compare that with what you heard internally.";
-        }
+        if (onEnd) onEnd();
     };
 }
 
+// Hear → Name
 function startHearTrial() {
     nextMnemonic();
     noteDisplay.textContent = "?";
     instruction.textContent = "Hear the mnemonic. What note does it belong to?";
-    statusDisplay.textContent = "Listen carefully.";
+    statusDisplay.textContent = "Listening…";
     mainButton.textContent = "Play Again";
-    mainButton.onclick = playCurrent;
-    secondaryButton.textContent = "Reveal Note";
+    mainButton.onclick = () => playFile(current, () => {
+        statusDisplay.textContent = "Recall the note, then reveal it.";
+    });
+
     secondaryButton.style.display = "block";
+    secondaryButton.textContent = "Reveal Note";
     secondaryButton.onclick = revealHearAnswer;
-    playCurrent();
+
+    playFile(current, () => {
+        statusDisplay.textContent = "Recall the note, then reveal it.";
+    });
 }
 
 function revealHearAnswer() {
     if (!current) return;
-
     noteDisplay.textContent = current.note;
-    statusDisplay.textContent =
-        "Connect the mnemonic firmly with " + current.note + ".";
+    statusDisplay.textContent = current.note;
     completeCurrent();
 
     secondaryButton.textContent = "Next Mnemonic";
     secondaryButton.onclick = startHearTrial;
 }
 
+// Note → Recall
 function startRecallTrial() {
     nextMnemonic();
     noteDisplay.textContent = current.note;
-    instruction.textContent = "Hear the mnemonic internally before checking.";
-    statusDisplay.textContent =
-        "Can you hear your " + current.note + " mnemonic in your head?";
+    instruction.textContent = "Hear your mnemonic internally before checking.";
+    statusDisplay.textContent = "When ready, play the mnemonic.";
     mainButton.textContent = "Play Mnemonic";
     mainButton.onclick = checkRecall;
     secondaryButton.style.display = "none";
@@ -367,56 +396,60 @@ function startRecallTrial() {
 function checkRecall() {
     if (!current) return;
 
-    playCurrent();
-    completeCurrent();
-
-    mainButton.textContent = "Play Again";
-    mainButton.onclick = playCurrent;
-
-    secondaryButton.textContent = "Next Note";
-    secondaryButton.style.display = "block";
-    secondaryButton.onclick = startRecallTrial;
+    statusDisplay.textContent = "Listening…";
+    playFile(current, () => {
+        statusDisplay.textContent = "Compare it with what you heard internally.";
+        completeCurrent();
+        secondaryButton.style.display = "block";
+        secondaryButton.textContent = "Next Note";
+        secondaryButton.onclick = startRecallTrial;
+    });
 }
 
-function completeCurrent() {
-    if (!current) return;
-
-    if (!completed.includes(current.note)) {
-        completed.push(current.note);
-    }
-
-    updateGrid();
-    updateStats();
-}
-
-function updateStats() {
-    progressDisplay.textContent = completed.length + " / 12 this round";
-    roundDisplay.textContent = "Round " + roundNumber;
-}
-
-function buildGrid() {
+// Listen mode
+function buildListenGrid() {
     pitchGrid.innerHTML = "";
 
     NOTES.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "pitch";
-        div.dataset.note = item.note;
-        div.textContent = item.note;
-        pitchGrid.appendChild(div);
+        const button = document.createElement("button");
+        button.className = "pitch";
+        button.type = "button";
+        button.textContent = item.note;
+
+        button.onclick = () => {
+            stopAudio();
+            button.classList.add("playing");
+            listenStatus.textContent = "Playing " + item.note + "…";
+
+            audio = new Audio(item.file);
+            audio.play().catch(() => {
+                listenStatus.textContent = "Couldn't play " + item.file;
+                button.classList.remove("playing");
+            });
+
+            audio.onended = () => {
+                button.classList.remove("playing");
+                listenStatus.textContent = item.note;
+            };
+        };
+
+        pitchGrid.appendChild(button);
     });
 }
 
-function updateGrid() {
-    document.querySelectorAll(".pitch").forEach(el => {
-        el.classList.toggle("used", completed.includes(el.dataset.note));
-    });
+function activateTab(tab) {
+    [hearModeButton, recallModeButton, listenModeButton]
+        .forEach(btn => btn.classList.remove("active"));
+    tab.classList.add("active");
 }
 
 function setHearMode() {
+    stopAudio();
     mode = "hear";
+    activateTab(hearModeButton);
 
-    hearModeButton.classList.add("active");
-    recallModeButton.classList.remove("active");
+    practicePanel.style.display = "block";
+    listenPanel.style.display = "none";
 
     current = null;
     noteDisplay.textContent = "?";
@@ -428,10 +461,12 @@ function setHearMode() {
 }
 
 function setRecallMode() {
+    stopAudio();
     mode = "recall";
+    activateTab(recallModeButton);
 
-    recallModeButton.classList.add("active");
-    hearModeButton.classList.remove("active");
+    practicePanel.style.display = "block";
+    listenPanel.style.display = "none";
 
     current = null;
     noteDisplay.textContent = "—";
@@ -442,21 +477,21 @@ function setRecallMode() {
     secondaryButton.style.display = "none";
 }
 
+function setListenMode() {
+    stopAudio();
+    mode = "listen";
+    activateTab(listenModeButton);
+
+    practicePanel.style.display = "none";
+    listenPanel.style.display = "block";
+    listenStatus.textContent = "Choose a note.";
+}
+
 hearModeButton.onclick = setHearMode;
 recallModeButton.onclick = setRecallMode;
+listenModeButton.onclick = setListenMode;
 
-document.addEventListener("keydown", event => {
-    if (event.code === "Space") {
-        event.preventDefault();
-        mainButton.click();
-    }
-    if (event.key.toLowerCase() === "r" &&
-        secondaryButton.style.display !== "none") {
-        secondaryButton.click();
-    }
-});
-
-// Register the service worker for offline use.
+// PWA service worker
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker.register("./service-worker.js")
@@ -464,7 +499,7 @@ if ("serviceWorker" in navigator) {
     });
 }
 
-// Android / Chromium install prompt.
+// Install prompt
 let deferredPrompt = null;
 
 window.addEventListener("beforeinstallprompt", event => {
@@ -475,7 +510,6 @@ window.addEventListener("beforeinstallprompt", event => {
 
 installButton.addEventListener("click", async () => {
     if (!deferredPrompt) return;
-
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
@@ -486,7 +520,7 @@ window.addEventListener("appinstalled", () => {
     installButton.style.display = "none";
 });
 
-// iPhone/iPad installation hint.
+// iPhone/iPad install hint
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone =
     window.matchMedia("(display-mode: standalone)").matches ||
@@ -496,10 +530,9 @@ if (isIOS && !isStandalone) {
     iosHint.style.display = "block";
 }
 
-buildGrid();
+buildListenGrid();
 refillBag();
 setHearMode();
 </script>
-
 </body>
 </html>
