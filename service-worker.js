@@ -1,4 +1,16 @@
-const CACHE_NAME = "mnemonic-solidifier-v5";
+/*
+  Mnemonic Solidifier - Service Worker v6
+
+  Behaviour:
+  - App files are available offline.
+  - WAV files are NETWORK-FIRST:
+      * Online: fetch the newest WAV from GitHub and replace the cached copy.
+      * Offline: use the cached WAV.
+  - Handles Safari/iOS byte-range audio requests.
+  - You do NOT need to bump the cache version just because you replace a WAV.
+*/
+
+const CACHE_NAME = "mnemonic-solidifier-v6";
 
 const FILES_TO_CACHE = [
   "./",
@@ -24,6 +36,15 @@ function absoluteURL(path) {
   return new URL(path, self.registration.scope).href;
 }
 
+function isWavRequest(request) {
+  try {
+    const url = new URL(request.url);
+    return url.pathname.toLowerCase().endsWith(".wav");
+  } catch {
+    return false;
+  }
+}
+
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
@@ -32,7 +53,11 @@ self.addEventListener("install", event => {
       try {
         const url = absoluteURL(file);
         const response = await fetch(url, { cache: "reload" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
         await cache.put(url, response);
       } catch (error) {
         console.warn("Could not pre-cache:", file, error);
@@ -57,14 +82,20 @@ self.addEventListener("activate", event => {
   })());
 });
 
-async function createRangeResponse(request, cachedResponse) {
+async function createRangeResponse(request, fullResponse) {
   const rangeHeader = request.headers.get("range");
-  if (!rangeHeader) return cachedResponse;
+
+  if (!rangeHeader) {
+    return fullResponse;
+  }
 
   const match = /^bytes=(\d*)-(\d*)$/i.exec(rangeHeader.trim());
-  if (!match) return cachedResponse;
 
-  const buffer = await cachedResponse.arrayBuffer();
+  if (!match) {
+    return fullResponse;
+  }
+
+  const buffer = await fullResponse.arrayBuffer();
   const total = buffer.byteLength;
 
   let start;
@@ -79,17 +110,25 @@ async function createRangeResponse(request, cachedResponse) {
     end = match[2] === "" ? total - 1 : Number(match[2]);
   }
 
-  if (start < 0 || end < start || start >= total) {
+  if (
+    !Number.isFinite(start) ||
+    !Number.isFinite(end) ||
+    start < 0 ||
+    end < start ||
+    start >= total
+  ) {
     return new Response(null, {
       status: 416,
-      headers: { "Content-Range": `bytes */${total}` }
+      headers: {
+        "Content-Range": `bytes */${total}`
+      }
     });
   }
 
   end = Math.min(end, total - 1);
 
   const sliced = buffer.slice(start, end + 1);
-  const headers = new Headers(cachedResponse.headers);
+  const headers = new Headers(fullResponse.headers);
 
   headers.set("Content-Range", `bytes ${start}-${end}/${total}`);
   headers.set("Content-Length", String(sliced.byteLength));
@@ -102,39 +141,97 @@ async function createRangeResponse(request, cachedResponse) {
   });
 }
 
+async function handleWavRequest(request) {
+  const cache = await caches.open(CACHE_NAME);
+
+  try {
+    const freshResponse = await fetch(request.url, {
+      method: "GET",
+      cache: "no-store",
+      credentials: "same-origin"
+    });
+
+    if (!freshResponse.ok) {
+      throw new Error(`HTTP ${freshResponse.status}`);
+    }
+
+    await cache.put(request.url, freshResponse.clone());
+
+    if (request.headers.has("range")) {
+      return createRangeResponse(request, freshResponse);
+    }
+
+    return freshResponse;
+
+  } catch (error) {
+    const cachedResponse = await cache.match(request.url, {
+      ignoreSearch: false,
+      ignoreVary: true
+    });
+
+    if (cachedResponse) {
+      if (request.headers.has("range")) {
+        return createRangeResponse(request, cachedResponse);
+      }
+
+      return cachedResponse;
+    }
+
+    return new Response("Audio unavailable offline.", {
+      status: 503,
+      statusText: "Offline"
+    });
+  }
+}
+
 self.addEventListener("fetch", event => {
   const request = event.request;
-  if (request.method !== "GET") return;
+
+  if (request.method !== "GET") {
+    return;
+  }
+
+  if (isWavRequest(request)) {
+    event.respondWith(handleWavRequest(request));
+    return;
+  }
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
+
     const cached = await cache.match(request.url, {
       ignoreSearch: false,
       ignoreVary: true
     });
 
     if (cached) {
-      if (request.headers.has("range")) {
-        return createRangeResponse(request, cached);
-      }
       return cached;
     }
 
     try {
       const response = await fetch(request);
 
-      if (response.ok && !request.headers.has("range")) {
+      if (response && response.ok) {
         await cache.put(request.url, response.clone());
       }
 
       return response;
+
     } catch (error) {
       if (request.mode === "navigate") {
-        const fallback = await cache.match(absoluteURL("./index.html"));
-        if (fallback) return fallback;
+        const fallback =
+          await cache.match(absoluteURL("./index.html")) ||
+          await cache.match(absoluteURL("./"));
+
+        if (fallback) {
+          return fallback;
+        }
       }
 
-      return new Response("Offline resource unavailable.", { status: 503 });
+      return new Response("Offline resource unavailable.", {
+        status: 503,
+        statusText: "Offline"
+      });
     }
   })());
 });
