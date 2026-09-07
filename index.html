@@ -144,9 +144,7 @@ button:active { transform: scale(.97); }
     color: var(--muted);
 }
 
-.listen-panel {
-    display: none;
-}
+.listen-panel { display: none; }
 
 .listen-title {
     text-align: center;
@@ -175,10 +173,20 @@ button:active { transform: scale(.97); }
 
 .install {
     width: 100%;
-    margin-top: 16px;
+    margin-top: 18px;
     background: var(--success);
     color: #111;
-    font-weight: 750;
+    font-weight: 800;
+    font-size: 1.05rem;
+}
+
+.install-note {
+    display: none;
+    margin-top: 10px;
+    text-align: center;
+    color: var(--muted);
+    font-size: .84rem;
+    line-height: 1.4;
 }
 
 .ios-hint {
@@ -242,7 +250,13 @@ button:active { transform: scale(.97); }
             <div id="listenStatus" class="listen-title" style="margin-top:16px;">Choose a note.</div>
         </div>
 
-        <button class="install" id="installButton" style="display:none;">Install App</button>
+        <button class="install" id="installButton" style="display:none;">
+            Install Mnemonic App
+        </button>
+
+        <div class="install-note" id="installNote">
+            Install this app on your phone for a full-screen home-screen version.
+        </div>
 
         <div class="ios-hint" id="iosHint">
             On iPhone/iPad: tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.
@@ -292,6 +306,7 @@ const roundDisplay = document.getElementById("round");
 const pitchGrid = document.getElementById("pitchGrid");
 const listenStatus = document.getElementById("listenStatus");
 const installButton = document.getElementById("installButton");
+const installNote = document.getElementById("installNote");
 const iosHint = document.getElementById("iosHint");
 
 function shuffle(array) {
@@ -352,7 +367,6 @@ function playFile(item, onEnd) {
     };
 }
 
-// Hear → Name
 function startHearTrial() {
     nextMnemonic();
     noteDisplay.textContent = "?";
@@ -382,7 +396,6 @@ function revealHearAnswer() {
     secondaryButton.onclick = startHearTrial;
 }
 
-// Note → Recall
 function startRecallTrial() {
     nextMnemonic();
     noteDisplay.textContent = current.note;
@@ -406,7 +419,6 @@ function checkRecall() {
     });
 }
 
-// Listen mode
 function buildListenGrid() {
     pitchGrid.innerHTML = "";
 
@@ -491,7 +503,7 @@ hearModeButton.onclick = setHearMode;
 recallModeButton.onclick = setRecallMode;
 listenModeButton.onclick = setListenMode;
 
-// PWA service worker
+/* Register service worker */
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker.register("./service-worker.js")
@@ -499,28 +511,45 @@ if ("serviceWorker" in navigator) {
     });
 }
 
-// Install prompt
+/*
+  Android / Chromium install prompt.
+  We intentionally capture beforeinstallprompt so the user gets a clear,
+  reliable install button inside the app.
+*/
 let deferredPrompt = null;
 
 window.addEventListener("beforeinstallprompt", event => {
     event.preventDefault();
     deferredPrompt = event;
     installButton.style.display = "block";
+    installNote.style.display = "block";
 });
 
 installButton.addEventListener("click", async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+        installNote.textContent =
+            "If Chrome does not offer installation, open the browser menu and choose Install app or Add to Home screen.";
+        installNote.style.display = "block";
+        return;
+    }
+
     deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
+
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+        installButton.style.display = "none";
+        installNote.textContent = "App installed.";
+    }
+
     deferredPrompt = null;
-    installButton.style.display = "none";
 });
 
 window.addEventListener("appinstalled", () => {
     installButton.style.display = "none";
+    installNote.style.display = "none";
 });
 
-// iPhone/iPad install hint
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone =
     window.matchMedia("(display-mode: standalone)").matches ||

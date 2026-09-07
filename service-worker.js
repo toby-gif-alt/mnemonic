@@ -1,16 +1,14 @@
 /*
-  Mnemonic Solidifier - Service Worker v6
+  Mnemonic Solidifier - Service Worker v7
 
-  Behaviour:
-  - App files are available offline.
-  - WAV files are NETWORK-FIRST:
-      * Online: fetch the newest WAV from GitHub and replace the cached copy.
-      * Offline: use the cached WAV.
-  - Handles Safari/iOS byte-range audio requests.
-  - You do NOT need to bump the cache version just because you replace a WAV.
+  - App shell works offline.
+  - WAV files are network-first:
+      online -> newest GitHub file replaces cache
+      offline -> cached WAV is used
+  - Safari/iOS byte-range audio requests are supported.
 */
 
-const CACHE_NAME = "mnemonic-solidifier-v6";
+const CACHE_NAME = "mnemonic-solidifier-v7";
 
 const FILES_TO_CACHE = [
   "./",
@@ -38,8 +36,7 @@ function absoluteURL(path) {
 
 function isWavRequest(request) {
   try {
-    const url = new URL(request.url);
-    return url.pathname.toLowerCase().endsWith(".wav");
+    return new URL(request.url).pathname.toLowerCase().endsWith(".wav");
   } catch {
     return false;
   }
@@ -54,9 +51,7 @@ self.addEventListener("install", event => {
         const url = absoluteURL(file);
         const response = await fetch(url, { cache: "reload" });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         await cache.put(url, response);
       } catch (error) {
@@ -84,16 +79,10 @@ self.addEventListener("activate", event => {
 
 async function createRangeResponse(request, fullResponse) {
   const rangeHeader = request.headers.get("range");
-
-  if (!rangeHeader) {
-    return fullResponse;
-  }
+  if (!rangeHeader) return fullResponse;
 
   const match = /^bytes=(\d*)-(\d*)$/i.exec(rangeHeader.trim());
-
-  if (!match) {
-    return fullResponse;
-  }
+  if (!match) return fullResponse;
 
   const buffer = await fullResponse.arrayBuffer();
   const total = buffer.byteLength;
@@ -119,9 +108,7 @@ async function createRangeResponse(request, fullResponse) {
   ) {
     return new Response(null, {
       status: 416,
-      headers: {
-        "Content-Range": `bytes */${total}`
-      }
+      headers: { "Content-Range": `bytes */${total}` }
     });
   }
 
@@ -173,7 +160,6 @@ async function handleWavRequest(request) {
       if (request.headers.has("range")) {
         return createRangeResponse(request, cachedResponse);
       }
-
       return cachedResponse;
     }
 
@@ -187,9 +173,7 @@ async function handleWavRequest(request) {
 self.addEventListener("fetch", event => {
   const request = event.request;
 
-  if (request.method !== "GET") {
-    return;
-  }
+  if (request.method !== "GET") return;
 
   if (isWavRequest(request)) {
     event.respondWith(handleWavRequest(request));
@@ -204,9 +188,7 @@ self.addEventListener("fetch", event => {
       ignoreVary: true
     });
 
-    if (cached) {
-      return cached;
-    }
+    if (cached) return cached;
 
     try {
       const response = await fetch(request);
@@ -223,9 +205,7 @@ self.addEventListener("fetch", event => {
           await cache.match(absoluteURL("./index.html")) ||
           await cache.match(absoluteURL("./"));
 
-        if (fallback) {
-          return fallback;
-        }
+        if (fallback) return fallback;
       }
 
       return new Response("Offline resource unavailable.", {
